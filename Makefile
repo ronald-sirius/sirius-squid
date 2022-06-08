@@ -46,3 +46,13 @@ down:
 
 
 .PHONY: process serve start codegen migration migrate up down
+
+reset:
+	@zsh reset-db.sh
+
+restart:
+	@zsh restart.sh
+
+abi:
+	@read -p "abi name: " TARGET \
+  && npx squid-evm-typegen --abi "src/abi/$${TARGET}.json" --output "src/abi/$${TARGET}.ts"

@@ -1,31 +1,49 @@
+type Lock @entity {
+  id: ID!
+  address: String!
+  amount: BigInt!
+  end: BigInt!
+}
+
+type LockSystemInfo @entity {
+  id: ID!
+  lockCount: BigInt!
+  averageLockTime: BigInt!
+
+  updated: BigInt!
+  updatedAtBlock: Int!
+  updatedAtTransaction: String!
+}
+
 type Token @entity {
   id: ID!
-  owner: Owner
-  uri: String
-  transfers: [Transfer!]! @derivedFrom(field: "token")
-  contract: Contract
-}
-
-type Owner @entity {
-  id: ID!
-  ownedTokens: [Token!]! @derivedFrom(field: "owner")
-  balance: BigInt
-}
-
-type Contract @entity {
-  id: ID!
+  address: String!
+  decimals: Int!
   name: String
   symbol: String
-  totalSupply: BigInt
-  mintedTokens: [Token!]! @derivedFrom(field: "contract")
 }
 
-type Transfer @entity {
+type Swap @entity {
   id: ID!
-  token: Token!
-  from: Owner
-  to: Owner
+  address: String!
+  tokens: [String!]!
+  baseTokens: [String!]!
+  underlyingTokens: [String!]!
+  balances: [BigInt!]!
+  tvl: Float!
+  dailyVolumes: [DailyVolume!] @derivedFrom(field: "swap")
+}
+
+type DailyTvl @entity {
+  id: ID!
+  swap: Swap!
   timestamp: BigInt!
-  block: Int!
-  transactionHash: String!
+  tvl: Float!
+}
+
+type DailyVolume @entity {
+  id: ID!
+  swap: Swap!
+  timestamp: BigInt!
+  volume: BigInt!
 }
