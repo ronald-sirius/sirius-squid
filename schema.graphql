@@ -30,15 +30,16 @@ type Swap @entity {
   baseTokens: [String!]!
   underlyingTokens: [String!]!
   balances: [BigInt!]!
-  tvl: Float!
+  tvl: BigInt!
   dailyVolumes: [DailyVolume!] @derivedFrom(field: "swap")
+  dailyTvl: [DailyTvl!] @derivedFrom(field: "swap")
 }
 
 type DailyTvl @entity {
   id: ID!
   swap: Swap!
   timestamp: BigInt!
-  tvl: Float!
+  tvl: BigInt!
 }
 
 type DailyVolume @entity {

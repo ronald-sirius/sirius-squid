@@ -1,5 +1,7 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
+import * as marshal from "./marshal"
 import {DailyVolume} from "./dailyVolume.model"
+import {DailyTvl} from "./dailyTvl.model"
 
 @Entity_()
 export class Swap {
@@ -25,9 +27,12 @@ export class Swap {
   @Column_("numeric", {array: true, nullable: false})
   balances!: (bigint)[]
 
-  @Column_("numeric", {nullable: false})
-  tvl!: number
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  tvl!: bigint
 
   @OneToMany_(() => DailyVolume, e => e.swap)
   dailyVolumes!: DailyVolume[]
+
+  @OneToMany_(() => DailyTvl, e => e.swap)
+  dailyTvl!: DailyTvl[]
 }

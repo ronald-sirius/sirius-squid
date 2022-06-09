@@ -4,6 +4,7 @@ import { Swap, DailyTvl, Token, DailyVolume } from "./model";
 import { events, abi } from "./abi/XSwapDeposit"
 import { abi as erc20ABI } from "./abi/ERC20"
 import { abi as BasePoolABI} from "./abi/SwapNormal"
+import { stopCoverage } from "v8";
 
 export const CHAIN_NODE = "wss://astar.api.onfinality.io/public-ws";
 const provider = new ethers.providers.WebSocketProvider(CHAIN_NODE);
@@ -20,32 +21,66 @@ export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
   let price = swapEvents.price
   let jpycPrice = Number(ethers.utils.formatUnits(price, 18))
   let swap = await getOrCreateSwap(ctx)
+  let balances = await getBalances(swap.address)
+  swap.balances = balances // update balances
   console.log("jpyc price:", jpycPrice)
 
   if (swap != null) {
-    let tokens = swap.underlyingTokens
-    if (soldId < tokens.length && boughtId < tokens.length) {
-      let soldToken = await getOrCreateToken(tokens[soldId], ctx)
-      console.log(`soldToken is ${soldToken.name}`)
-      let boughtToken = await getOrCreateToken(tokens[boughtId], ctx)
-      console.log(`boughtToken is ${boughtToken.name}`)
-      let sellVolume = Number(ethers.utils.formatUnits(tokensSold, soldToken.decimals))
-      let boughtVolume = Number(ethers.utils.formatUnits(tokensBought, boughtToken.decimals))
+    { 
+      // update daily volume
+      let tokens = swap.underlyingTokens
+      if (soldId < tokens.length && boughtId < tokens.length) {
+        let soldToken = await getOrCreateToken(tokens[soldId], ctx)
+        console.log(`soldToken is ${soldToken.name}`)
+        let boughtToken = await getOrCreateToken(tokens[boughtId], ctx)
+        console.log(`boughtToken is ${boughtToken.name}`)
+        let sellVolume = Number(ethers.utils.formatUnits(tokensSold, soldToken.decimals))
+        let boughtVolume = Number(ethers.utils.formatUnits(tokensBought, boughtToken.decimals))
+  
+        if (tokens[boughtId] == JPYC_ADDRESS) {
+          sellVolume = sellVolume * jpycPrice
+        }
+        if (tokens[soldId] == JPYC_ADDRESS) {
+          boughtVolume = boughtVolume * jpycPrice
+        }
+        console.log("sellVolume:", sellVolume)
+        console.log("boughtVolume:", boughtVolume)
+        let volume = (sellVolume + boughtVolume) / 2
+        console.log("volume:", volume)
+        let dailyVolume = await getDailyTradeVolume(swap.id, BigInt(ctx.substrate.block.timestamp), ctx)
+        dailyVolume.volume = dailyVolume.volume + BigInt(Math.floor(volume))
+        console.log("dailyVolume:", dailyVolume.volume)
+        await ctx.store.save(dailyVolume)
+      }
+    }
 
-      if (tokens[boughtId] == JPYC_ADDRESS) {
-        sellVolume = sellVolume * jpycPrice
+    {
+      // update TVL and daily TVL
+      let tvl = 0
+      let tokens =swap.tokens
+      for (let i = 0; i < tokens.length; i++) {
+        let token = await getOrCreateToken(tokens[i], ctx)
+        let decimals = token.decimals
+        let balance = balances[i]
+        let balanceDivDecimals = ethers.utils.formatUnits(balance, decimals)
+        console.log('balanceDivDecimals:', balanceDivDecimals)
+        if (token.address == JPYC_ADDRESS) {
+          console.log(`token is jpyc`)
+          let tokenTVL = Number(balanceDivDecimals) / jpycPrice
+          // let tokenTVL = BigNumber.from(balanceDivDecimals).mul(BigNumber.from(1 / jpycPrice))
+          console.log(`jpyc tokenTVL: ${tokenTVL}`)
+          tvl = tvl + tokenTVL
+        } else {
+          tvl = tvl + Number(balanceDivDecimals)
+        }
+        tvl = Math.floor(tvl)
+        console.log(`tvl ${tvl}`)
       }
-      if (tokens[soldId] == JPYC_ADDRESS) {
-        boughtVolume = boughtVolume * jpycPrice
-      }
-      console.log("sellVolume:", sellVolume)
-      console.log("boughtVolume:", boughtVolume)
-      let volume = (sellVolume + boughtVolume) / 2
-      console.log("volume:", volume)
-      let dailyVolume = await getDailyTradeVolume(swap.id, BigInt(ctx.substrate.block.timestamp), ctx)
-      dailyVolume.volume = dailyVolume.volume + BigInt(Math.floor(volume))
-      console.log("dailyVolume:", dailyVolume.volume)
-      await ctx.store.save(dailyVolume)
+      swap.tvl = BigInt(tvl)
+
+      let dailyTvl = await getDailyPoolTvl(swap.address, BigInt(ctx.substrate.block.timestamp), ctx)
+      dailyTvl.tvl = BigInt(tvl)
+      await ctx.store.save(dailyTvl)
     }
 
     await ctx.store.save(swap)
@@ -63,7 +98,7 @@ export async function getOrCreateSwap(ctx: EvmLogHandlerContext): Promise<Swap> 
       baseTokens: await registerTokens(info.baseTokens, ctx),
       underlyingTokens: await registerTokens(info.underlyingTokens, ctx),
       balances: info.balances,
-      tvl: 0,
+      tvl: 0n,
     })
   }
   await ctx.store.save(swap);
@@ -191,4 +226,26 @@ export async function getDailyTradeVolume(
     await ctx.store.save(volume)
   }
   return assertNotNull(volume)
+}
+
+export async function getDailyPoolTvl(
+  swap: string,
+  timestamp: BigInt,
+  ctx: EvmLogHandlerContext
+): Promise<DailyTvl> {
+  let interval = BigInt(60 * 60 * 24 * 1000).valueOf()
+  let day = timestamp.valueOf() / interval * interval
+  let id = swap + "-day-" + day.toString()
+  let tvl = await ctx.store.get(DailyTvl, id)
+
+  if (tvl == null) {
+    tvl = new DailyTvl({
+      id,
+      swap: await ctx.store.get(Swap, swap),
+      timestamp: timestamp.valueOf(),
+      tvl: BigInt(0)
+    })
+    await ctx.store.save(tvl)
+  }
+  return assertNotNull(tvl)
 }

@@ -56,3 +56,7 @@ restart:
 abi:
 	@read -p "abi name: " TARGET \
   && npx squid-evm-typegen --abi "src/abi/$${TARGET}.json" --output "src/abi/$${TARGET}.ts"
+
+deploy:
+	@read -p "version number: " VERSION \
+	&& npx sqd squid:release sirius@$${VERSION} --source "https://github.com/0xlou/sirius-squid#master"

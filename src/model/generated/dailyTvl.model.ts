@@ -18,6 +18,6 @@ export class DailyTvl {
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   timestamp!: bigint
 
-  @Column_("numeric", {nullable: false})
-  tvl!: number
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  tvl!: bigint
 }
