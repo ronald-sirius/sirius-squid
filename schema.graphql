@@ -32,7 +32,7 @@ type Swap @entity {
   balances: [BigInt!]!
   tvl: BigInt!
   dailyVolumes: [DailyVolume!] @derivedFrom(field: "swap")
-  dailyTvl: [DailyTvl!] @derivedFrom(field: "swap")
+  dailyTvls: [DailyTvl!] @derivedFrom(field: "swap")
 }
 
 type DailyTvl @entity {

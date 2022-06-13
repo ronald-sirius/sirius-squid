@@ -34,5 +34,5 @@ export class Swap {
   dailyVolumes!: DailyVolume[]
 
   @OneToMany_(() => DailyTvl, e => e.swap)
-  dailyTvl!: DailyTvl[]
+  dailyTvls!: DailyTvl[]
 }
