@@ -19,10 +19,19 @@ export class Swap {
   tokens!: (string)[]
 
   @Column_("text", {array: true, nullable: false})
+  tokensSymbol!: (string)[]
+
+  @Column_("text", {array: true, nullable: false})
   baseTokens!: (string)[]
 
   @Column_("text", {array: true, nullable: false})
+  baseTokensSymbol!: (string)[]
+
+  @Column_("text", {array: true, nullable: false})
   underlyingTokens!: (string)[]
+
+  @Column_("text", {array: true, nullable: false})
+  underlyingTokensSymbol!: (string)[]
 
   @Column_("numeric", {array: true, nullable: false})
   balances!: (bigint)[]

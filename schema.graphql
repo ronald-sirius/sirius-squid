@@ -27,8 +27,11 @@ type Swap @entity {
   id: ID!
   address: String!
   tokens: [String!]!
+  tokensSymbol: [String!]!
   baseTokens: [String!]!
+  baseTokensSymbol: [String!]!
   underlyingTokens: [String!]!
+  underlyingTokensSymbol: [String!]!
   balances: [BigInt!]!
   tvl: BigInt!
   dailyVolumes: [DailyVolume!] @derivedFrom(field: "swap")

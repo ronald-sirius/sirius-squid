@@ -3,14 +3,12 @@ import { ethers } from "ethers";
 import { events } from "./abi/XSwapDeposit"
 import { getOrCreateSwap, getBalances, getOrCreateToken, getDailyTradeVolume, getDailyPoolTvl } from "./helpers"
 
-
 export const CHAIN_NODE = "wss://astar.api.onfinality.io/public-ws";
-const provider = new ethers.providers.WebSocketProvider(CHAIN_NODE);
-const JPYC_ADDRESS = "0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB";
-const JPYC_DECIMALS = 18;
+const WBNB_ADDRESS = "0x7f27352D5F83Db87a5A3E00f4B07Cc2138D8ee52";
+const WBNB_DECIMALS = 18;
 
 export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
-  console.log('\n==== find JPYC swap ====')
+  console.log('\n==== find WBNB swap ====')
   console.log(`at block: ${ctx.substrate.block.height}`)
   console.log(`at tx: ${ctx.txHash}`)
   const swapEvents = events["TokenExchange(address,uint256,uint256,uint256,uint256,uint256)"].decode(ctx);
@@ -20,12 +18,12 @@ export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
   let boughtId = swapEvents.boughtId.toNumber()
   let tokensBought = swapEvents.tokensBought
   let price = swapEvents.price
-  let jpycPrice = Number(ethers.utils.formatUnits(price, 18))
+  let wbnbPrice = Number(ethers.utils.formatUnits(price, 18))
   let swap = await getOrCreateSwap(ctx)
   let balances = await getBalances(swap.address)
   swap.balances = balances // update balances
-  console.log("jpyc price:", jpycPrice)
-  console.log("real jpyc price:", 1 / jpycPrice)
+  console.log("wbnb price:", wbnbPrice)
+  console.log("real wbnb price:", 1 / wbnbPrice)
 
   if (swap != null) {
     { 
@@ -39,11 +37,11 @@ export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
         let sellVolume = Number(ethers.utils.formatUnits(tokensSold, soldToken.decimals))
         let boughtVolume = Number(ethers.utils.formatUnits(tokensBought, boughtToken.decimals))
   
-        if (tokens[boughtId] == JPYC_ADDRESS) {
-          sellVolume = sellVolume * jpycPrice
+        if (tokens[boughtId] == WBNB_ADDRESS) {
+          sellVolume = sellVolume * wbnbPrice
         }
-        if (tokens[soldId] == JPYC_ADDRESS) {
-          boughtVolume = boughtVolume * jpycPrice
+        if (tokens[soldId] == WBNB_ADDRESS) {
+          boughtVolume = boughtVolume * wbnbPrice
         }
         console.log("sellVolume:", sellVolume)
         console.log("boughtVolume:", boughtVolume)
@@ -64,8 +62,8 @@ export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
         let decimals = token.decimals
         let balance = balances[i]
         let balanceDivDecimals = ethers.utils.formatUnits(balance, decimals)
-        if (token.address == JPYC_ADDRESS) {
-          let tokenTVL = Number(balanceDivDecimals) / jpycPrice
+        if (token.address == WBNB_ADDRESS) {
+          let tokenTVL = Number(balanceDivDecimals) / wbnbPrice
           tvl = tvl + tokenTVL
         } else {
           tvl = tvl + Number(balanceDivDecimals)
@@ -82,4 +80,5 @@ export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
     await ctx.store.save(swap)
   }
 }
+
 
