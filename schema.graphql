@@ -26,6 +26,8 @@ type Token @entity {
 type Swap @entity {
   id: ID!
   address: String!
+  metaPool: String!
+  basePool: String!
   tokens: [String!]!
   tokensSymbol: [String!]!
   baseTokens: [String!]!

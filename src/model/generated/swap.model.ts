@@ -15,6 +15,12 @@ export class Swap {
   @Column_("text", {nullable: false})
   address!: string
 
+  @Column_("text", {nullable: false})
+  metaPool!: string
+
+  @Column_("text", {nullable: false})
+  basePool!: string
+
   @Column_("text", {array: true, nullable: false})
   tokens!: (string)[]
 

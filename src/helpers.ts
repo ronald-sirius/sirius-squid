@@ -14,6 +14,8 @@ export async function getOrCreateSwap(ctx: EvmLogHandlerContext): Promise<Swap> 
     swap = new Swap({
       id: ctx.contractAddress,
       address: ctx.contractAddress,
+      metaPool: info.metaPool,
+      basePool: info.basePool,
       tokens: await registerTokens(info.tokens, ctx),
       baseTokens: await registerTokens(info.baseTokens, ctx),
       underlyingTokens: await registerTokens(info.underlyingTokens, ctx),
