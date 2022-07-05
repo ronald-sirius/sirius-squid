@@ -53,3 +53,9 @@ type DailyVolume @entity {
   timestamp: BigInt!
   volume: BigInt!
 }
+
+type VeHolder @entity {
+  id: ID!
+  address: String!
+  updatedAt: Number!
+}

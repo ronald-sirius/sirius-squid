@@ -1,6 +1,6 @@
 import { assertNotNull, EvmLogHandlerContext, Store } from "@subsquid/substrate-evm-processor";
 import { BigNumber, ethers } from "ethers";
-import { Lock, LockSystemInfo } from "./model";
+import { Lock, LockSystemInfo, VeHolder } from "./model";
 import { events, abi } from "./abi/VotingEscrow"
 
 export const CHAIN_NODE = "wss://astar.api.onfinality.io/public-ws";
@@ -58,5 +58,19 @@ export async function processDeposit(ctx: EvmLogHandlerContext): Promise<void> {
     lockSystemInfo.lockCount = newCount;
     lockSystemInfo.averageLockTime = newAverage;
     ctx.store.save(lockSystemInfo);
+  }
+}
+
+export async function updateVeHolder(ctx: EvmLogHandlerContext): Promise<void> {
+  const depositEvent = events['Deposit(address,uint256,uint256,int128,uint256)'].decode(ctx)
+  const userAddress = depositEvent.provider
+  let user = await ctx.store.get(VeHolder, userAddress)
+  if (user == null) {
+    user = new VeHolder({
+      id: userAddress,
+      address: userAddress,
+      updatedAt: +new Date()
+    })
+    await ctx.store.save(user)
   }
 }
