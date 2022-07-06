@@ -1,84 +1,106 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-plusplus */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable import/extensions */
 import { EvmLogHandlerContext } from "@subsquid/substrate-evm-processor";
 import { ethers } from "ethers";
-import { events } from "./abi/XSwapDeposit"
-import { getOrCreateSwap, getBalances, getOrCreateToken, getDailyTradeVolume, getDailyPoolTvl } from "./helpers"
+import { events } from "./abi/XSwapDeposit";
+import {
+  getOrCreateSwap,
+  getBalances,
+  getOrCreateToken,
+  getDailyTradeVolume,
+  getDailyPoolTvl,
+} from "./helpers";
 
-export const CHAIN_NODE = "wss://astar.api.onfinality.io/public-ws";
 const WBNB_ADDRESS = "0x7f27352D5F83Db87a5A3E00f4B07Cc2138D8ee52";
-const WBNB_DECIMALS = 18;
 
 export async function handleSwap(ctx: EvmLogHandlerContext): Promise<void> {
-  console.log('\n==== find WBNB swap ====')
-  console.log(`at block: ${ctx.substrate.block.height}`)
-  console.log(`at tx: ${ctx.txHash}`)
-  const swapEvents = events["TokenExchange(address,uint256,uint256,uint256,uint256,uint256)"].decode(ctx);
-  let buyer = swapEvents.buyer
-  let soldId = swapEvents.soldId.toNumber()
-  let tokensSold = swapEvents.tokensSold
-  let boughtId = swapEvents.boughtId.toNumber()
-  let tokensBought = swapEvents.tokensBought
-  let price = swapEvents.price
-  let wbnbPrice = Number(ethers.utils.formatUnits(price, 18))
-  let swap = await getOrCreateSwap(ctx)
-  let balances = await getBalances(swap.address)
-  swap.balances = balances // update balances
-  console.log("wbnb price:", wbnbPrice)
-  console.log("real wbnb price:", 1 / wbnbPrice)
+  console.log("\n==== find WBNB swap ====");
+  console.log(`at block: ${ctx.substrate.block.height}`);
+  console.log(`at tx: ${ctx.txHash}`);
+  const swapEvents =
+    events[
+      "TokenExchange(address,uint256,uint256,uint256,uint256,uint256)"
+    ].decode(ctx);
+  const { buyer } = swapEvents;
+  const soldId = swapEvents.soldId.toNumber();
+  const { tokensSold } = swapEvents;
+  const boughtId = swapEvents.boughtId.toNumber();
+  const { tokensBought } = swapEvents;
+  const { price } = swapEvents;
+  const wbnbPrice = Number(ethers.utils.formatUnits(price, 18));
+  const swap = await getOrCreateSwap(ctx);
+  const balances = await getBalances(swap.address);
+  swap.balances = balances; // update balances
+  console.log("wbnb price:", wbnbPrice);
+  console.log("real wbnb price:", 1 / wbnbPrice);
 
   if (swap != null) {
-    { 
+    {
       // update daily volume
-      let tokens = swap.underlyingTokens
+      const tokens = swap.underlyingTokens;
       if (soldId < tokens.length && boughtId < tokens.length) {
-        let soldToken = await getOrCreateToken(tokens[soldId], ctx)
-        console.log(`soldToken is ${soldToken.name}`)
-        let boughtToken = await getOrCreateToken(tokens[boughtId], ctx)
-        console.log(`boughtToken is ${boughtToken.name}`)
-        let sellVolume = Number(ethers.utils.formatUnits(tokensSold, soldToken.decimals))
-        let boughtVolume = Number(ethers.utils.formatUnits(tokensBought, boughtToken.decimals))
-  
-        if (tokens[boughtId] == WBNB_ADDRESS) {
-          sellVolume = sellVolume * wbnbPrice
+        const soldToken = await getOrCreateToken(tokens[soldId], ctx);
+        console.log(`soldToken is ${soldToken.name}`);
+        const boughtToken = await getOrCreateToken(tokens[boughtId], ctx);
+        console.log(`boughtToken is ${boughtToken.name}`);
+        let sellVolume = Number(
+          ethers.utils.formatUnits(tokensSold, soldToken.decimals)
+        );
+        let boughtVolume = Number(
+          ethers.utils.formatUnits(tokensBought, boughtToken.decimals)
+        );
+
+        if (tokens[boughtId] === WBNB_ADDRESS) {
+          sellVolume *= wbnbPrice;
         }
-        if (tokens[soldId] == WBNB_ADDRESS) {
-          boughtVolume = boughtVolume * wbnbPrice
+        if (tokens[soldId] === WBNB_ADDRESS) {
+          boughtVolume *= wbnbPrice;
         }
-        console.log("sellVolume:", sellVolume)
-        console.log("boughtVolume:", boughtVolume)
-        let volume = (sellVolume + boughtVolume) / 2
-        console.log("volume:", volume)
-        let dailyVolume = await getDailyTradeVolume(swap.id, BigInt(ctx.substrate.block.timestamp), ctx)
-        dailyVolume.volume = dailyVolume.volume + BigInt(Math.floor(volume))
-        await ctx.store.save(dailyVolume)
+        console.log("sellVolume:", sellVolume);
+        console.log("boughtVolume:", boughtVolume);
+        const volume = (sellVolume + boughtVolume) / 2;
+        console.log("volume:", volume);
+        const dailyVolume = await getDailyTradeVolume(
+          swap.id,
+          BigInt(ctx.substrate.block.timestamp),
+          ctx
+        );
+        dailyVolume.volume += BigInt(Math.floor(volume));
+        await ctx.store.save(dailyVolume);
       }
     }
 
     {
       // update TVL and daily TVL
-      let tvl = 0
-      let tokens =swap.tokens
+      let tvl = 0;
+      const { tokens } = swap;
+      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < tokens.length; i++) {
-        let token = await getOrCreateToken(tokens[i], ctx)
-        let decimals = token.decimals
-        let balance = balances[i]
-        let balanceDivDecimals = ethers.utils.formatUnits(balance, decimals)
-        if (token.address == WBNB_ADDRESS) {
-          let tokenTVL = Number(balanceDivDecimals) / wbnbPrice
-          tvl = tvl + tokenTVL
+        const token = await getOrCreateToken(tokens[i], ctx);
+        const { decimals } = token;
+        const balance = balances[i];
+        const balanceDivDecimals = ethers.utils.formatUnits(balance, decimals);
+        if (token.address === WBNB_ADDRESS) {
+          const tokenTVL = Number(balanceDivDecimals) / wbnbPrice;
+          tvl += tokenTVL;
         } else {
-          tvl = tvl + Number(balanceDivDecimals)
+          tvl += Number(balanceDivDecimals);
         }
-        tvl = Math.floor(tvl)
+        tvl = Math.floor(tvl);
       }
-      swap.tvl = BigInt(tvl)
+      swap.tvl = BigInt(tvl);
 
-      let dailyTvl = await getDailyPoolTvl(swap.address, BigInt(ctx.substrate.block.timestamp), ctx)
-      dailyTvl.tvl = BigInt(tvl)
-      await ctx.store.save(dailyTvl)
+      const dailyTvl = await getDailyPoolTvl(
+        swap.address,
+        BigInt(ctx.substrate.block.timestamp),
+        ctx
+      );
+      dailyTvl.tvl = BigInt(tvl);
+      await ctx.store.save(dailyTvl);
     }
 
-    await ctx.store.save(swap)
+    await ctx.store.save(swap);
   }
 }
-
-
