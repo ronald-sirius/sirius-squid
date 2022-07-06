@@ -57,5 +57,5 @@ type DailyVolume @entity {
 type VeHolder @entity {
   id: ID!
   address: String!
-  updatedAt: Number!
+  updatedAt: BigInt!
 }

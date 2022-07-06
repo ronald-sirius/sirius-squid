@@ -13,5 +13,5 @@ export class VeHolder {
   address!: string
 
   @Column_('numeric', { nullable: false })
-  updatedAt!: number
+  updatedAt!: bigint
 }

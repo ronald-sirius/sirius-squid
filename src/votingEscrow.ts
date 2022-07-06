@@ -69,7 +69,7 @@ export async function updateVeHolder(ctx: EvmLogHandlerContext): Promise<void> {
     user = new VeHolder({
       id: userAddress,
       address: userAddress,
-      updatedAt: +new Date()
+      updatedAt: BigInt(+new Date()).valueOf()
     })
     await ctx.store.save(user)
   }

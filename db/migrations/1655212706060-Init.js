@@ -12,6 +12,7 @@ module.exports = class Init1655212706060 {
     await db.query(`CREATE TABLE "swap" ("id" character varying NOT NULL, "address" text NOT NULL, "meta_pool" text NOT NULL, "base_pool" text NOT NULL, "tokens" text array NOT NULL, "tokens_symbol" text array NOT NULL, "base_tokens" text array NOT NULL, "base_tokens_symbol" text array NOT NULL, "underlying_tokens" text array NOT NULL, "underlying_tokens_symbol" text array NOT NULL, "balances" numeric array NOT NULL, "tvl" numeric NOT NULL, CONSTRAINT "PK_4a10d0f359339acef77e7f986d9" PRIMARY KEY ("id"))`)
     await db.query(`ALTER TABLE "daily_volume" ADD CONSTRAINT "FK_46ce54619866aecbabbe96447cd" FOREIGN KEY ("swap_id") REFERENCES "swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "daily_tvl" ADD CONSTRAINT "FK_b76ee280bd4cda9b9304c9633b5" FOREIGN KEY ("swap_id") REFERENCES "swap"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
+    await db.query(`CREATE TABLE "ve_holder" ("id" character varying NOT NULL, "address" text NOT NULL, "updated_at" numeric NOT NULL, CONSTRAINT "PK_82fae97f905930df5d62a702fd9" PRIMARY KEY ("id"))`)
   }
 
   async down(db) {
