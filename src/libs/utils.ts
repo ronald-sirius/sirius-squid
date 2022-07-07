@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import { Deferrable } from "ethers/lib/utils";
 
 export function createProvider(): Provider {
+  console.log("Wrapping a provider...");
   const provider = new ethers.providers.WebSocketProvider(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     process.env.RPC_NODE!
@@ -18,8 +19,13 @@ export function createProvider(): Provider {
     transaction: Deferrable<TransactionRequest>,
     blockTag?: BlockTag | Promise<BlockTag>
   ) {
-    return retry(async () => timeout(originalCall(transaction, blockTag)));
+    console.log("With retrying....");
+    return retry(async () =>
+      timeout(originalCall.call(provider, transaction, blockTag))
+    );
   };
+
+  provider.on("error", console.error);
 
   return provider;
 }
