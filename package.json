@@ -4,7 +4,7 @@
   "scripts": {
     "build": "rm -rf lib && tsc",
     "init": "node db/init.js",
-    "db:migrate": "npx sqd db migrate",
+    "db:migrate": "npx squid-typeorm-migration apply",
     "schema:reset": "",
     "processor:migrate": "echo skip",
     "processor:start": "node lib/processor.js",
@@ -21,6 +21,7 @@
     "@subsquid/ss58": "^0.1.0",
     "@subsquid/substrate-evm-processor": "^0.0.4",
     "@subsquid/substrate-processor": "^0.7.0",
+    "@subsquid/typeorm-migration": "0.0.0",
     "dotenv": "^16.0.0",
     "ethers": "^5.6.4",
     "pg": "^8.7.3",
