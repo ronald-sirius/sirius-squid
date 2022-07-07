@@ -70,7 +70,7 @@ export async function processDeposit(ctx: EvmLogHandlerContext): Promise<void> {
     lockSystemInfo.lockCount = newCount;
     lockSystemInfo.averageLockTime = newAverage;
     // eslint-disable-next-line no-void
-    void ctx.store.save(lockSystemInfo);
+    void (await ctx.store.save(lockSystemInfo));
   }
 }
 

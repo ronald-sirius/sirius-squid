@@ -53,6 +53,7 @@ export async function retry<T>(
 ): Promise<T> {
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < attempts; i++) {
+    if (i > 0) console.log(`Retrying: ${attempts + 1}`);
     try {
       return await promiseFn();
       // eslint-disable-next-line id-length
