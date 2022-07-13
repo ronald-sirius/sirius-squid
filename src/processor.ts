@@ -11,6 +11,22 @@ import * as wbnbPool from "./wbnbPool";
 import * as wbtcPool from "./wbtcPool";
 import * as wethPool from "./wethPool";
 
+// for pkex
+import * as PoolsABI from "./abi/Pools";
+import * as PoolsTierABI from "./abi/PoolsTier";
+import * as FarmsABI from "./abi/Farms";
+import * as pkexStake from "./pkexStake";
+// pkex pools
+const PKEX_PKEX_DEPOSIT = "0xC8f9d27B4e5E9c956c7344C87D2eF05381D89Fc9";
+const DOT_PKEX_DEPOSIT = "0x8986CD046741CBfEe8F36a1dCD2af7C2a4942F1A";
+const PKEX_PKEX2_DEPOSIT = "0x81e92630B409Fc1A593853B1f35115C7d7E6F0bc";
+// pkex farms
+const ASTR_PKEX_STAKE = "0x9F519083A069Cee2585cB4931C77C6EA21c3517E";
+const ASTR_USDC_STAKE = "0x228a56F238F5441B1469B3bc6F64ddd362a3a0AF";
+const USDC_USDT_STAKE = "0x367545a43B89A81d1a3816F13505cC7bB840c1f6";
+const PKEX_USDC_STAKE = "0x34f0DB653A0CF8487D942223e5C347f3a2526039";
+const PKEX_DOT_STAKE = "0x6B44EF63fe77C56478a191bC1673E24e0408a780";
+
 const processor = new SubstrateEvmProcessor("astar-substrate");
 
 const JPYC_METAPOOL_DEPOSIT = "0x3cd1Fa4EeeFdf6c30E66c66A474e8E4dd509f54c";
@@ -113,5 +129,71 @@ processor.addEvmLogHandler(
   },
   wethPool.handleSwap
 );
+
+// TODO change rangeFrom
+processor.addEvmLogHandler(
+  PKEX_PKEX_DEPOSIT.toLowerCase(),
+  {
+    filter: [PoolsABI.events['Stake(address,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handlePoolDeposit
+)
+processor.addEvmLogHandler(
+  DOT_PKEX_DEPOSIT.toLowerCase(),
+  {
+    filter: [PoolsABI.events['Stake(address,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handlePoolDeposit
+)
+processor.addEvmLogHandler(
+  PKEX_PKEX2_DEPOSIT.toLowerCase(),
+  {
+    filter: [PoolsTierABI.events['Stake(address,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handlePoolTierDeposit
+)
+processor.addEvmLogHandler(
+  ASTR_PKEX_STAKE.toLowerCase(),
+  {
+    filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handleFarmStake
+)
+processor.addEvmLogHandler(
+  ASTR_USDC_STAKE.toLowerCase(),
+  {
+    filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handleFarmStake
+)
+processor.addEvmLogHandler(
+  USDC_USDT_STAKE.toLowerCase(),
+  {
+    filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handleFarmStake
+)
+processor.addEvmLogHandler(
+  PKEX_USDC_STAKE.toLowerCase(),
+  {
+    filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handleFarmStake
+)
+processor.addEvmLogHandler(
+  PKEX_DOT_STAKE.toLowerCase(),
+  {
+    filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
+    range: { from: 1e6 }
+  },
+  pkexStake.handleFarmStake
+)
 
 processor.run();
