@@ -22,7 +22,7 @@
     "@subsquid/substrate-evm-processor": "^0.0.4",
     "@subsquid/substrate-processor": "^0.7.0",
     "@subsquid/typeorm-migration": "^0.1.0",
-    "@subsquid/typeorm-store": "^.1.0",
+    "@subsquid/typeorm-store": "^0.1.0",
     "dotenv": "^16.0.0",
     "ethers": "^5.6.4",
     "pg": "^8.7.3",
