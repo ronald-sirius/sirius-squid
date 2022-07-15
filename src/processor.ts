@@ -45,7 +45,7 @@ processor.setBatchSize(500);
 processor.setDataSource({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   chain: process.env.RPC_NODE!,
-  archive: lookupArchive("astar", { release: "5" }),
+  archive: lookupArchive("astar")[0].url,
 });
 
 processor.setTypesBundle("astar");
