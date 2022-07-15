@@ -45,7 +45,7 @@ processor.setBatchSize(500);
 processor.setDataSource({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   chain: process.env.RPC_NODE!,
-  archive: lookupArchive("astar")[0].url,
+  archive: lookupArchive("astar", { release: "5" }),
 });
 
 processor.setTypesBundle("astar");
@@ -135,7 +135,7 @@ processor.addEvmLogHandler(
   PKEX_PKEX_DEPOSIT.toLowerCase(),
   {
     filter: [PoolsABI.events['Stake(address,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 251038 }
   },
   pkexStake.handlePoolDeposit
 )
@@ -143,7 +143,7 @@ processor.addEvmLogHandler(
   DOT_PKEX_DEPOSIT.toLowerCase(),
   {
     filter: [PoolsABI.events['Stake(address,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 1156055 }
   },
   pkexStake.handlePoolDeposit
 )
@@ -151,7 +151,7 @@ processor.addEvmLogHandler(
   PKEX_PKEX2_DEPOSIT.toLowerCase(),
   {
     filter: [PoolsTierABI.events['Stake(address,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 385556 }
   },
   pkexStake.handlePoolTierDeposit
 )
@@ -159,7 +159,7 @@ processor.addEvmLogHandler(
   ASTR_PKEX_STAKE.toLowerCase(),
   {
     filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 250937 }
   },
   pkexStake.handleFarmStake
 )
@@ -167,7 +167,7 @@ processor.addEvmLogHandler(
   ASTR_USDC_STAKE.toLowerCase(),
   {
     filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 250947 }
   },
   pkexStake.handleFarmStake
 )
@@ -175,7 +175,7 @@ processor.addEvmLogHandler(
   USDC_USDT_STAKE.toLowerCase(),
   {
     filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 250976 }
   },
   pkexStake.handleFarmStake
 )
@@ -183,7 +183,7 @@ processor.addEvmLogHandler(
   PKEX_USDC_STAKE.toLowerCase(),
   {
     filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 277767 }
   },
   pkexStake.handleFarmStake
 )
@@ -191,7 +191,7 @@ processor.addEvmLogHandler(
   PKEX_DOT_STAKE.toLowerCase(),
   {
     filter: [FarmsABI.events['Staked(address,uint256,uint256,uint256)'].topic],
-    range: { from: 1e6 }
+    range: { from: 1155918 }
   },
   pkexStake.handleFarmStake
 )
