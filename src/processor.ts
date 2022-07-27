@@ -10,6 +10,7 @@ import * as jpycPool from "./jpycPool";
 import * as wbnbPool from "./wbnbPool";
 import * as wbtcPool from "./wbtcPool";
 import * as wethPool from "./wethPool";
+import * as nastrPool from "./nastrPool";
 
 // for pkex
 import * as PoolsABI from "./abi/Pools";
@@ -34,11 +35,13 @@ const WBNB_METAPOOL_DEPOSIT = "0xC9d4f937Fa8e0193b46817a41435a262867ff090";
 const WBTC_METAPOOL_DEPOSIT = "0xD25Cf814EeE54840A08Db8dfAbFE445B1DE37f0f";
 const WETH_METAPOOL_DEPOSIT = "0x2d5Da7c463B3E8f4CF1AF08a1aA0a5DB9BB644F7";
 const VE_TOKEN_ADDRESS = "0xc9D383f1e6E5270D77ad8e198729e237b60b6397";
+const NASTR_SWAP_ADDRESS = "0xEEa640c27620D7C448AD655B6e3FB94853AC01e3";
 
 const JPYC_START_BLOCK = 1147515;
 const WBNB_START_BLOCK = 1230280;
 const WBTC_START_BLOCK = 1230279;
 const WETH_START_BLOCK = 1230280;
+const NASTR_START_BLOCK = 1501149;
 
 processor.setBatchSize(500);
 
@@ -129,6 +132,15 @@ processor.addEvmLogHandler(
   },
   wethPool.handleSwap
 );
+
+processor.addEvmLogHandler(
+  NASTR_SWAP_ADDRESS.toLowerCase(),
+  {
+    filter: [XSwapDepositABI.events['TokenExchange(address,uint256,uint256,uint256,uint256,uint256)'].topic],
+    range: { from: NASTR_START_BLOCK }
+  },
+  nastrPool.handleSwap
+)
 
 processor.addEvmLogHandler(
   PKEX_PKEX_DEPOSIT.toLowerCase(),
