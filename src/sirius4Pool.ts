@@ -1,31 +1,33 @@
-import { EvmLogHandlerContext } from '@subsquid/substrate-evm-processor'
-import { ethers } from 'ethers'
-import { events, abi } from './abi/SwapNormal'
-import { getOrCreateSwap, getBalances, getOrCreateToken, getDailyTradeVolume, getDailyPoolTvl } from './helpers'
-import { createProvider } from './libs/utils'
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-plusplus */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable import/extensions */
+import { EvmLogHandlerContext } from "@subsquid/substrate-evm-processor";
+import { ethers } from "ethers";
+import { events } from "./abi/SwapNormal";
+import {
+  getOrCreateSwap,
+  getBalances,
+  getOrCreateToken,
+  getDailyTradeVolume,
+  getDailyPoolTvl,
+} from "./helpers";
 
-const NASTR_ADDRESS = '0xE511ED88575C57767BAfb72BfD10775413E3F2b0'
-export const NASTR_SWAP_ADDRESS = '0xEEa640c27620D7C448AD655B6e3FB94853AC01e3'
-
-const swapContract = new ethers.Contract(NASTR_SWAP_ADDRESS, abi, createProvider())
+// TODO unknown
+const SRS4_ADDRESS = "0x417E9d065ee22DFB7CC6C63C403600E27627F333";
 
 export async function handleTokenSwap(ctx: EvmLogHandlerContext): Promise<void> {
-  console.log("\n==== find NASTR swap ====");
+  console.log("\n==== find SRS4 swap ====");
   console.log(`at block: ${ctx.substrate.block.height}`);
   console.log(`at tx: ${ctx.txHash}`);
   const swapEvents = events['TokenSwap(address,uint256,uint256,uint128,uint128)'].decode(ctx)
   const { buyer, tokensSold, tokensBought } = swapEvents
   const soldId = swapEvents.soldId.toNumber()
   const boughtId = swapEvents.boughtId.toNumber()
-
-  // TODO get price
-  const nastrPrice = 1
-
+  const srs4Price = 1
   const swap = await getOrCreateSwap(ctx);
   const balances = await getBalances(swap.address);
   swap.balances = balances; // update balances
-  console.log("nastr price:", nastrPrice);
-  console.log("real nastr price:", 1 / nastrPrice);
 
   if (swap != null) {
     {
@@ -43,11 +45,11 @@ export async function handleTokenSwap(ctx: EvmLogHandlerContext): Promise<void> 
           ethers.utils.formatUnits(tokensBought, boughtToken.decimals)
         );
 
-        if (tokens[boughtId] === NASTR_ADDRESS) {
-          sellVolume *= nastrPrice;
+        if (tokens[boughtId] === SRS4_ADDRESS) {
+          sellVolume *= srs4Price;
         }
-        if (tokens[soldId] === NASTR_ADDRESS) {
-          boughtVolume *= nastrPrice;
+        if (tokens[soldId] === SRS4_ADDRESS) {
+          boughtVolume *= srs4Price;
         }
         console.log("sellVolume:", sellVolume);
         console.log("boughtVolume:", boughtVolume);
@@ -72,8 +74,8 @@ export async function handleTokenSwap(ctx: EvmLogHandlerContext): Promise<void> 
         const { decimals } = token;
         const balance = balances[i];
         const balanceDivDecimals = ethers.utils.formatUnits(balance, decimals);
-        if (token.address === NASTR_ADDRESS) {
-          const tokenTVL = Number(balanceDivDecimals) / nastrPrice;
+        if (token.address === SRS4_ADDRESS) {
+          const tokenTVL = Number(balanceDivDecimals) / srs4Price;
           tvl += tokenTVL;
         } else {
           tvl += Number(balanceDivDecimals);

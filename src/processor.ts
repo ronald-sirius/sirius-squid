@@ -6,11 +6,17 @@ import * as VotingEscrowABI from "./abi/VotingEscrow";
 import * as VotingEscrow from "./votingEscrow";
 // eslint-disable-next-line import/extensions
 import * as XSwapDepositABI from "./abi/XSwapDeposit";
+import * as SwapNormalABI from "./abi/SwapNormal";
+import * as MetaSwapABI from "./abi/MetaSwap";
 import * as jpycPool from "./jpycPool";
 import * as wbnbPool from "./wbnbPool";
 import * as wbtcPool from "./wbtcPool";
 import * as wethPool from "./wethPool";
 import * as nastrPool from "./nastrPool";
+import * as srs4Pool from "./sirius4Pool";
+import * as lay4Pool from "./starlay4Pool";
+import * as baiMetapool from "./baiMetapool";
+import * as ousdMetapool from "./ousdMetapool";
 
 // for pkex
 import * as PoolsABI from "./abi/Pools";
@@ -35,13 +41,20 @@ const WBNB_METAPOOL_DEPOSIT = "0xC9d4f937Fa8e0193b46817a41435a262867ff090";
 const WBTC_METAPOOL_DEPOSIT = "0xD25Cf814EeE54840A08Db8dfAbFE445B1DE37f0f";
 const WETH_METAPOOL_DEPOSIT = "0x2d5Da7c463B3E8f4CF1AF08a1aA0a5DB9BB644F7";
 const VE_TOKEN_ADDRESS = "0xc9D383f1e6E5270D77ad8e198729e237b60b6397";
-const NASTR_SWAP_ADDRESS = "0xEEa640c27620D7C448AD655B6e3FB94853AC01e3";
+const SRS4_SWAP = "0x417E9d065ee22DFB7CC6C63C403600E27627F333";
+const LAY4_SWAP = "0x0fB8C4eB33A30eBb01588e3110968430E3E69D58";
+const BAI_META_SWAP = "0x290c7577D209c2d8DB06F377af31318cE31938fB";
+const OUSD_META_SWAP = "0xD18AbE9bcedeb5A9a65439e604b0BE8db0bdB176";
 
 const JPYC_START_BLOCK = 1147515;
 const WBNB_START_BLOCK = 1230280;
 const WBTC_START_BLOCK = 1230279;
 const WETH_START_BLOCK = 1230280;
-const NASTR_START_BLOCK = 1501149;
+const NASTR_START_BLOCK = 1501293;
+const SRS4_START_BLOCK = 815172;
+const LAY4_START_BLOCK = 1049234;
+const BAI_START_BLOCK = 914215;
+const OUSD_START_BLOCK = 908527;
 
 processor.setBatchSize(500);
 
@@ -133,14 +146,50 @@ processor.addEvmLogHandler(
   wethPool.handleSwap
 );
 
-processor.addEvmLogHandler(
-  NASTR_SWAP_ADDRESS.toLowerCase(),
-  {
-    filter: [XSwapDepositABI.events['TokenExchange(address,uint256,uint256,uint256,uint256,uint256)'].topic],
-    range: { from: NASTR_START_BLOCK }
-  },
-  nastrPool.handleSwap
-)
+// processor.addEvmLogHandler(
+//   nastrPool.NASTR_SWAP_ADDRESS.toLowerCase(),
+//   {
+//     filter: [SwapNormalABI.events['TokenSwap(address,uint256,uint256,uint128,uint128)'].topic],
+//     range: { from: NASTR_START_BLOCK }
+//   },
+//   nastrPool.handleTokenSwap
+// )
+
+// processor.addEvmLogHandler(
+//   SRS4_SWAP.toLowerCase(),
+//   {
+//     filter: [SwapNormalABI.events['TokenSwap(address,uint256,uint256,uint128,uint128)'].topic],
+//     range: { from: SRS4_START_BLOCK }
+//   },
+//   srs4Pool.handleTokenSwap
+// )
+
+// processor.addEvmLogHandler(
+//   LAY4_SWAP.toLowerCase(),
+//   {
+//     filter: [SwapNormalABI.events['TokenSwap(address,uint256,uint256,uint128,uint128)'].topic],
+//     range: { from: LAY4_START_BLOCK }
+//   },
+//   lay4Pool.handleTokenSwap
+// )
+
+// processor.addEvmLogHandler(
+//   BAI_META_SWAP.toLowerCase(),
+//   {
+//     filter: [MetaSwapABI.events['TokenSwap(address,uint256,uint256,uint128,uint128)'].topic],
+//     range: { from: BAI_START_BLOCK }
+//   },
+//   baiMetapool.handleTokenSwap
+// )
+
+// processor.addEvmLogHandler(
+//   OUSD_META_SWAP.toLowerCase(),
+//   {
+//     filter: [MetaSwapABI.events['TokenSwap(address,uint256,uint256,uint128,uint128)'].topic],
+//     range: { from: OUSD_START_BLOCK }
+//   },
+//   ousdMetapool.handleTokenSwap
+// )
 
 processor.addEvmLogHandler(
   PKEX_PKEX_DEPOSIT.toLowerCase(),
